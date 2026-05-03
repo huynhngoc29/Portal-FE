@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
-import axios from 'axios';
-import './App.css';
+import { useEffect, useState } from "react";
+import axios from "axios";
+import "./App.css";
 
 interface Tool {
   id: number;
@@ -22,12 +22,12 @@ function App() {
 
   const fetchTools = async () => {
     try {
-      const response = await axios.get('http://localhost:3001/tools');
+      const response = await axios.get("http://localhost:3001/tools");
       setTools(response.data);
       setLoading(false);
     } catch (err) {
-      console.error('Error fetching tools:', err);
-      setError('Failed to load tools');
+      console.error("Error fetching tools:", err);
+      setError("Failed to load tools");
       setLoading(false);
     }
   };
@@ -56,7 +56,11 @@ function App() {
               className="tool-card"
             >
               {tool.icon_url && (
-                <img src={tool.icon_url} alt={tool.name} className="tool-icon" />
+                <img
+                  src={tool.icon_url}
+                  alt={tool.name}
+                  className="tool-icon"
+                />
               )}
               <h2 className="tool-name">{tool.name}</h2>
               <p className="tool-description">{tool.description}</p>
