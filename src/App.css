@@ -1,0 +1,11 @@
+/* App specific styles */
+
+.container {
+  width: 100%;
+  margin: 0 auto;
+}
+
+.app-title {
+  text-align: center;
+  padding: 20px 0;
+}
