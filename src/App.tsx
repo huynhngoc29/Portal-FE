@@ -1,77 +1,77 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Link,
+  useLocation,
+} from "react-router-dom";
+import AdminPage from "./pages/AdminPage";
+import UserPage from "./pages/UserPage";
 import "./App.css";
 
-interface Tool {
-  id: number;
-  name: string;
-  description: string;
-  icon_url: string;
-  url: string;
-  is_active: boolean;
+function NavigationBar() {
+  const location = useLocation();
+  const isAdmin = location.pathname === "/admin";
+
+  return (
+    <nav
+      style={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        padding: "20px 40px",
+        background: "rgba(18, 18, 24, 0.4)",
+        backdropFilter: "blur(10px)",
+        borderBottom: "1px solid rgba(255, 255, 255, 0.05)",
+        position: "sticky",
+        top: 0,
+        zIndex: 50,
+      }}
+    >
+      <div
+        style={{
+          fontSize: "1.25rem",
+          fontWeight: 800,
+          background: "linear-gradient(135deg, #a855f7, #3b82f6)",
+          WebkitBackgroundClip: "text",
+          backgroundClip: "text",
+          WebkitTextFillColor: "transparent",
+        }}
+      >
+        Portal
+      </div>
+
+      <div style={{ display: "flex", gap: "16px" }}>
+        <Link
+          to="/"
+          className={!isAdmin ? "primary-button" : "ghost-button"}
+          style={{ padding: "8px 16px", borderRadius: "10px" }}
+        >
+          User View
+        </Link>
+        <Link
+          to="/admin"
+          className={isAdmin ? "primary-button" : "ghost-button"}
+          style={{ padding: "8px 16px", borderRadius: "10px" }}
+        >
+          Admin Dashboard
+        </Link>
+      </div>
+    </nav>
+  );
 }
 
 function App() {
-  const [tools, setTools] = useState<Tool[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    fetchTools();
-  }, []);
-
-  const fetchTools = async () => {
-    try {
-      const response = await axios.get("http://localhost:3001/tools");
-      setTools(response.data);
-      setLoading(false);
-    } catch (err) {
-      console.error("Error fetching tools:", err);
-      setError("Failed to load tools");
-      setLoading(false);
-    }
-  };
-
-  if (loading) return <div className="loading">Loading tools...</div>;
-
   return (
-    <div className="container">
-      <div className="header">
-        <h1>Portal Dashboard</h1>
-        <p>Quản lý và truy cập các công cụ khác nhau</p>
-      </div>
-
-      {error && <div className="error">{error}</div>}
-
-      <div className="tools-grid">
-        {tools.length === 0 ? (
-          <div className="no-tools">Không có tool nào</div>
-        ) : (
-          tools.map((tool) => (
-            <a
-              key={tool.id}
-              href={tool.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="tool-card"
-            >
-              {tool.icon_url && (
-                <img
-                  src={tool.icon_url}
-                  alt={tool.name}
-                  className="tool-icon"
-                />
-              )}
-              <h2 className="tool-name">{tool.name}</h2>
-              <p className="tool-description">{tool.description}</p>
-              <div className="tool-footer">
-                <span className="tool-badge">Truy cập →</span>
-              </div>
-            </a>
-          ))
-        )}
-      </div>
-    </div>
+    <BrowserRouter>
+      <NavigationBar />
+      <main className="page-shell">
+        <Routes>
+          <Route path="/" element={<UserPage />} />
+          <Route path="/admin" element={<AdminPage />} />
+        </Routes>
+      </main>
+    </BrowserRouter>
   );
 }
 
