@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState, FormEvent } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import type { FormEvent } from 'react';
 import axios from 'axios';
 
 type Tool = {
@@ -29,6 +30,7 @@ const emptyForm: ToolFormState = {
 const api = axios.create({
   baseURL: 'http://localhost:3001',
 });
+const adminToolKey = import.meta.env.VITE_ADMIN_TOOL_KEY;
 
 export default function AdminPage() {
   const [tools, setTools] = useState<Tool[]>([]);
@@ -82,7 +84,17 @@ export default function AdminPage() {
       if (editingToolId) {
         await api.put(`/tools/${editingToolId}`, payload);
       } else {
-        await api.post('/tools', payload);
+        if (!adminToolKey) {
+          setError('Thiếu VITE_ADMIN_TOOL_KEY trên frontend env.');
+          setSubmitting(false);
+          return;
+        }
+
+        await api.post('/tools/admin', payload, {
+          headers: {
+            'x-admin-key': adminToolKey,
+          },
+        });
       }
 
       await fetchTools();
