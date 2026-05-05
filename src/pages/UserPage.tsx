@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link, useOutletContext } from 'react-router-dom';
+import { Search } from 'lucide-react';
 
 type Tool = {
   id: number;
@@ -27,6 +28,7 @@ export default function UserPage() {
   const [tools, setTools] = useState<Tool[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     void fetchTools();
@@ -48,6 +50,11 @@ export default function UserPage() {
     }
   };
 
+  const filteredTools = tools.filter(tool => 
+    tool.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    (tool.description && tool.description.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
+
   return (
     <>
       <section className="hero" style={{ borderBottom: 'none', paddingBottom: 0 }}>
@@ -64,8 +71,29 @@ export default function UserPage() {
         <div className="alert error">{error}</div>
       ) : (
         <section className="panel" style={{ marginTop: '40px', maxWidth: '1000px', margin: '40px auto' }}>
-          <div className="panel-heading" style={{ justifyContent: 'center', textAlign: 'center', marginBottom: '40px' }}>
+          <div className="panel-heading" style={{ justifyContent: 'center', textAlign: 'center', marginBottom: '40px', flexDirection: 'column', gap: '20px' }}>
             <h2>Danh sách ứng dụng khả dụng</h2>
+            <div style={{ position: 'relative', width: '100%', maxWidth: '400px', margin: '0 auto' }}>
+              <Search style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} size={20} />
+              <input 
+                type="text" 
+                placeholder="Tìm kiếm ứng dụng..." 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                style={{ 
+                  width: '100%', 
+                  padding: '14px 16px 14px 48px', 
+                  borderRadius: '24px', 
+                  background: 'rgba(0,0,0,0.3)', 
+                  border: '1px solid rgba(255,255,255,0.1)', 
+                  color: 'white',
+                  fontSize: '0.95rem',
+                  outline: 'none',
+                  transition: 'all 0.3s ease',
+                  boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.2)'
+                }} 
+              />
+            </div>
           </div>
 
           {loading ? (
@@ -74,12 +102,12 @@ export default function UserPage() {
             <div className="state-box">Hiện tại chưa có hệ thống nào được kích hoạt.</div>
           ) : (
             <div className="tools-grid">
-              {tools.map((tool) => (
+              {filteredTools.map((tool) => (
                 <article key={tool.id} className="tool-card">
                   <div className="tool-card-top">
                     <div className="tool-icon-wrap" style={{ background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8' }}>
                       {tool.icon_url ? (
-                         <img src={tool.icon_url} alt={tool.name} className="tool-icon" />
+                        <img src={tool.icon_url} alt={tool.name} className="tool-icon" />
                       ) : (
                         <span>{tool.name.slice(0, 1).toUpperCase()}</span>
                       )}
@@ -88,7 +116,7 @@ export default function UserPage() {
                       <h3>{tool.name}</h3>
                     </div>
                   </div>
-                  
+
                   <p style={{ marginTop: '10px' }}>{tool.description || 'Hệ thống tiện ích nội bộ.'}</p>
 
                   <div className="tool-actions" style={{ marginTop: 'auto', paddingTop: '20px' }}>

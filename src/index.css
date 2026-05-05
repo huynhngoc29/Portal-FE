@@ -1,6 +1,7 @@
 :root {
   /* Color Palette */
-  --bg-main: #06060c; /* Deep rich black */
+  --bg-main: #06060c;
+  /* Deep rich black */
   --bg-card: rgba(18, 18, 24, 0.6);
   --bg-card-hover: rgba(28, 28, 36, 0.8);
 
@@ -13,11 +14,9 @@
 
   --accent-primary: #a855f7;
   --accent-secondary: #3b82f6;
-  --accent-gradient: linear-gradient(
-    135deg,
-    var(--accent-primary),
-    var(--accent-secondary)
-  );
+  --accent-gradient: linear-gradient(135deg,
+      var(--accent-primary),
+      var(--accent-secondary));
   --accent-glow: rgba(168, 85, 247, 0.25);
 
   --success: #10b981;
@@ -47,16 +46,12 @@ body {
   font-family: var(--font-sans);
   background: var(--bg-main);
   background-image:
-    radial-gradient(
-      circle at 15% 10%,
+    radial-gradient(circle at 15% 10%,
       rgba(168, 85, 247, 0.12) 0%,
-      transparent 40%
-    ),
-    radial-gradient(
-      circle at 85% 90%,
+      transparent 40%),
+    radial-gradient(circle at 85% 90%,
       rgba(59, 130, 246, 0.1) 0%,
-      transparent 40%
-    ),
+      transparent 40%),
     url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.02'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
   color: var(--text-primary);
   line-height: 1.5;
@@ -88,6 +83,7 @@ textarea {
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -98,9 +94,11 @@ textarea {
   0% {
     box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.4);
   }
+
   70% {
     box-shadow: 0 0 0 10px rgba(168, 85, 247, 0);
   }
+
   100% {
     box-shadow: 0 0 0 0 rgba(168, 85, 247, 0);
   }
