@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import { Link, useOutletContext } from 'react-router-dom';
 
 type Tool = {
   id: number;
@@ -10,11 +11,19 @@ type Tool = {
   is_active: boolean;
 };
 
+type AuthUser = {
+  id: number;
+  email: string;
+  fullName: string;
+  isAdmin: boolean;
+};
+
 const api = axios.create({
   baseURL: 'http://localhost:3001',
 });
 
 export default function UserPage() {
+  const { user } = useOutletContext<{ user: AuthUser | null }>();
   const [tools, setTools] = useState<Tool[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -83,9 +92,15 @@ export default function UserPage() {
                   <p style={{ marginTop: '10px' }}>{tool.description || 'Hệ thống tiện ích nội bộ.'}</p>
 
                   <div className="tool-actions" style={{ marginTop: 'auto', paddingTop: '20px' }}>
-                    <a href={tool.url} target="_blank" rel="noreferrer" className="primary-button" style={{ textDecoration: 'none', width: '100%' }}>
-                      Truy cập ngay
-                    </a>
+                    {user ? (
+                      <a href={tool.url} target="_blank" rel="noreferrer" className="primary-button" style={{ textDecoration: 'none', width: '100%' }}>
+                        Truy cập ngay
+                      </a>
+                    ) : (
+                      <Link to="/login" className="primary-button" style={{ textDecoration: 'none', width: '100%' }}>
+                        Đăng nhập để dùng
+                      </Link>
+                    )}
                   </div>
                 </article>
               ))}
