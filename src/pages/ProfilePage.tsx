@@ -1,6 +1,16 @@
 import { useOutletContext, useNavigate, Navigate } from "react-router-dom";
-import { User, Mail, Shield, ShieldCheck, Camera, LogOut, ArrowLeft, Loader2 } from "lucide-react";
+import {
+  User,
+  Mail,
+  Shield,
+  ShieldCheck,
+  Camera,
+  LogOut,
+  ArrowLeft,
+  Loader2,
+} from "lucide-react";
 import { useState } from "react";
+import { API_BASE_URL } from "../services/api";
 
 type AuthUser = {
   id: number;
@@ -162,7 +172,7 @@ function EditProfileForm({
   const [fullName, setFullName] = useState(user?.fullName || "");
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(
-    user?.avatarUrl || null
+    user?.avatarUrl || null,
   );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -192,17 +202,14 @@ function EditProfileForm({
           reader.onload = async (e) => {
             const base64Data = e.target?.result as string;
             try {
-              const resp = await fetch(
-                "http://localhost:3001/auth/profile/avatar",
-                {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                    Authorization: token ? `Bearer ${token}` : "",
-                  },
-                  body: JSON.stringify({ avatarData: base64Data }),
-                }
-              );
+              const resp = await fetch(`${API_BASE_URL}/auth/profile/avatar`, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: token ? `Bearer ${token}` : "",
+                },
+                body: JSON.stringify({ avatarData: base64Data }),
+              });
               if (!resp.ok) throw new Error("Upload failed");
               const data = await resp.json();
               resolve(data.user?.avatarUrl);
@@ -219,7 +226,7 @@ function EditProfileForm({
       const payload: any = { fullName };
       if (avatarUrl) payload.avatarUrl = avatarUrl;
 
-      const res = await fetch("http://localhost:3001/auth/profile", {
+      const res = await fetch(`${API_BASE_URL}/auth/profile`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -314,7 +321,11 @@ function EditProfileForm({
         >
           {loading ? (
             <>
-              <Loader2 size={18} className="animate-spin" style={{ marginRight: 8 }} />
+              <Loader2
+                size={18}
+                className="animate-spin"
+                style={{ marginRight: 8 }}
+              />
               Đang lưu...
             </>
           ) : (
