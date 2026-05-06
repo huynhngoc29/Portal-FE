@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
-import axios from "axios";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { oauthService } from "../services/oauthService";
+import { api } from "../services/api";
 
 type AuthUser = {
   id: number;
@@ -21,10 +21,6 @@ type AuthFormState = {
   fullName: string;
   password: string;
 };
-
-const authApi = axios.create({
-  baseURL: "http://localhost:3001",
-});
 
 const emptyForm: AuthFormState = {
   email: "",
@@ -141,7 +137,7 @@ export default function AuthPage() {
             };
 
       const endpoint = mode === "register" ? "/auth/signup" : "/auth/login";
-      const response = await authApi.post<AuthResponse>(endpoint, payload);
+      const response = await api.post<AuthResponse>(endpoint, payload);
 
       localStorage.setItem(AUTH_TOKEN_KEY, response.data.access_token);
       localStorage.setItem(AUTH_USER_KEY, JSON.stringify(response.data.user));

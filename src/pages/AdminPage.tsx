@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
-import axios from "axios";
+import { api } from "../services/api";
 
 type Tool = {
   id: number;
@@ -26,11 +26,7 @@ const emptyForm: ToolFormState = {
   url: "",
   is_active: true,
 };
-
-const api = axios.create({
-  baseURL: "http://localhost:3001",
-});
-const adminToolKey = import.meta.env.VITE_ADMIN_TOOL_KEY;
+const AUTH_TOKEN_KEY = "portal_auth_token";
 
 export default function AdminPage() {
   const [tools, setTools] = useState<Tool[]>([]);
@@ -86,15 +82,10 @@ export default function AdminPage() {
       if (editingToolId) {
         await api.put(`/tools/${editingToolId}`, payload);
       } else {
-        if (!adminToolKey) {
-          setError("Thiếu VITE_ADMIN_TOOL_KEY trên frontend env.");
-          setSubmitting(false);
-          return;
-        }
-
+        const token = localStorage.getItem(AUTH_TOKEN_KEY) || "";
         await api.post("/tools/admin", payload, {
           headers: {
-            "x-admin-key": adminToolKey,
+            Authorization: `Bearer ${token}`,
           },
         });
       }
@@ -265,8 +256,18 @@ export default function AdminPage() {
           </form>
         </div>
 
-        <div className="panel list-panel" style={{ padding: 0, overflow: 'hidden' }}>
-          <div className="panel-heading" style={{ padding: '24px 32px', marginBottom: 0, borderBottom: '1px solid var(--border-light)' }}>
+        <div
+          className="panel list-panel"
+          style={{ padding: 0, overflow: "hidden" }}
+        >
+          <div
+            className="panel-heading"
+            style={{
+              padding: "24px 32px",
+              marginBottom: 0,
+              borderBottom: "1px solid var(--border-light)",
+            }}
+          >
             <div>
               <p className="section-label">Danh sách</p>
               <h2 style={{ margin: 0 }}>Quản lý các hệ thống</h2>
@@ -274,58 +275,129 @@ export default function AdminPage() {
           </div>
 
           {loading ? (
-            <div className="state-box" style={{ margin: 32 }}>Đang tải dữ liệu...</div>
+            <div className="state-box" style={{ margin: 32 }}>
+              Đang tải dữ liệu...
+            </div>
           ) : tools.length === 0 ? (
             <div className="state-box" style={{ margin: 32 }}>
               Hệ thống trống. Hãy thêm ứng dụng mới bên cạnh.
             </div>
           ) : (
-            <div className="table-container" style={{ border: 'none', borderRadius: 0 }}>
+            <div
+              className="table-container"
+              style={{ border: "none", borderRadius: 0 }}
+            >
               <table className="data-table">
                 <thead>
                   <tr>
                     <th>Hệ thống</th>
                     <th>Trạng thái</th>
                     <th>Đường dẫn</th>
-                    <th style={{ textAlign: 'right' }}>Thao tác</th>
+                    <th style={{ textAlign: "right" }}>Thao tác</th>
                   </tr>
                 </thead>
                 <tbody>
                   {tools.map((tool) => (
                     <tr key={tool.id}>
                       <td>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                          <div style={{ width: 40, height: 40, borderRadius: '8px', background: 'var(--accent-gradient)', display: 'grid', placeItems: 'center', fontWeight: 'bold', flexShrink: 0 }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "12px",
+                          }}
+                        >
+                          <div
+                            style={{
+                              width: 40,
+                              height: 40,
+                              borderRadius: "8px",
+                              background: "var(--accent-gradient)",
+                              display: "grid",
+                              placeItems: "center",
+                              fontWeight: "bold",
+                              flexShrink: 0,
+                            }}
+                          >
                             {tool.icon_url ? (
-                                <img src={tool.icon_url} alt={tool.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }} />
+                              <img
+                                src={tool.icon_url}
+                                alt={tool.name}
+                                style={{
+                                  width: "100%",
+                                  height: "100%",
+                                  objectFit: "cover",
+                                  borderRadius: "8px",
+                                }}
+                              />
                             ) : (
-                                tool.name.charAt(0).toUpperCase()
+                              tool.name.charAt(0).toUpperCase()
                             )}
                           </div>
                           <div>
-                            <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{tool.name}</div>
-                            <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                              {tool.description && tool.description.length > 40 ? tool.description.substring(0, 40) + '...' : (tool.description || 'Không có mô tả')}
+                            <div
+                              style={{
+                                fontWeight: 600,
+                                color: "var(--text-primary)",
+                              }}
+                            >
+                              {tool.name}
+                            </div>
+                            <div
+                              style={{
+                                fontSize: "0.85rem",
+                                color: "var(--text-secondary)",
+                              }}
+                            >
+                              {tool.description && tool.description.length > 40
+                                ? tool.description.substring(0, 40) + "..."
+                                : tool.description || "Không có mô tả"}
                             </div>
                           </div>
                         </div>
                       </td>
                       <td>
-                        <span className={tool.is_active ? "badge active" : "badge inactive"}>
+                        <span
+                          className={
+                            tool.is_active ? "badge active" : "badge inactive"
+                          }
+                        >
                           {tool.is_active ? "Kích hoạt" : "Vô hiệu"}
                         </span>
                       </td>
                       <td>
-                        <a href={tool.url} target="_blank" rel="noreferrer" style={{ color: 'var(--accent-secondary)', fontSize: '0.9rem' }}>
-                          {tool.url && tool.url.length > 25 ? tool.url.substring(0, 25) + '...' : tool.url}
+                        <a
+                          href={tool.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          style={{
+                            color: "var(--accent-secondary)",
+                            fontSize: "0.9rem",
+                          }}
+                        >
+                          {tool.url && tool.url.length > 25
+                            ? tool.url.substring(0, 25) + "..."
+                            : tool.url}
                         </a>
                       </td>
                       <td>
-                        <div className="td-actions" style={{ justifyContent: 'flex-end' }}>
-                          <button type="button" className="ghost-button" onClick={() => handleEdit(tool)}>
+                        <div
+                          className="td-actions"
+                          style={{ justifyContent: "flex-end" }}
+                        >
+                          <button
+                            type="button"
+                            className="ghost-button"
+                            onClick={() => handleEdit(tool)}
+                          >
                             Sửa
                           </button>
-                          <button type="button" className="ghost-button" style={{ color: '#f87171' }} onClick={() => handleDelete(tool.id)}>
+                          <button
+                            type="button"
+                            className="ghost-button"
+                            style={{ color: "#f87171" }}
+                            onClick={() => handleDelete(tool.id)}
+                          >
                             Xóa
                           </button>
                         </div>

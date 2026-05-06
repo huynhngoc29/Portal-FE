@@ -9,6 +9,7 @@ import {
 } from "react-router-dom";
 import { useEffect, useState } from "react";
 import AdminPage from "./pages/AdminPage";
+import AdminUsersPage from "./pages/AdminUsersPage";
 import AuthPage from "./pages/AuthPage";
 import UserPage from "./pages/UserPage";
 import ProfilePage from "./pages/ProfilePage";
@@ -394,6 +395,7 @@ function App() {
             {/* Lớp bảo vệ riêng cho Admin */}
             <Route element={<AdminLayout user={authUser} />}>
               <Route path="/admin" element={<AdminPage />} />
+              <Route path="/admin/users" element={<AdminUsersPage />} />
               <Route
                 path="/admin/*"
                 element={

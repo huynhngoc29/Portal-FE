@@ -1,8 +1,4 @@
-import axios from "axios";
-
-const authApi = axios.create({
-  baseURL: "http://localhost:3001",
-});
+import { api } from "./api";
 
 export type AuthResponse = {
   access_token: string;
@@ -19,7 +15,7 @@ export const oauthService = {
     try {
       // Decode JWT token client-side to extract picture and send to backend
       const decoded = this.decodeGoogleToken(credentialResponse.credential);
-      const response = await authApi.post<AuthResponse>("/auth/social-login", {
+      const response = await api.post<AuthResponse>("/auth/social-login", {
         provider: "google",
         email: credentialResponse.email || decoded?.email,
         fullName: credentialResponse.name || decoded?.name,
@@ -36,16 +32,13 @@ export const oauthService = {
 
   async loginWithFacebook(response: any): Promise<AuthResponse> {
     try {
-      const authResponse = await authApi.post<AuthResponse>(
-        "/auth/social-login",
-        {
-          provider: "facebook",
-          email: response.email,
-          fullName: response.name,
-          idToken: response.accessToken,
-          picture: response.picture,
-        },
-      );
+      const authResponse = await api.post<AuthResponse>("/auth/social-login", {
+        provider: "facebook",
+        email: response.email,
+        fullName: response.name,
+        idToken: response.accessToken,
+        picture: response.picture,
+      });
 
       return authResponse.data;
     } catch (error) {
