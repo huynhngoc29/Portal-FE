@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
-import type { FormEvent } from 'react';
-import axios from 'axios';
+import { useEffect, useMemo, useState } from "react";
+import type { FormEvent } from "react";
+import { api } from "../services/api";
 
 type Tool = {
   id: number;
@@ -20,17 +20,13 @@ type ToolFormState = {
 };
 
 const emptyForm: ToolFormState = {
-  name: '',
-  description: '',
-  icon_url: '',
-  url: '',
+  name: "",
+  description: "",
+  icon_url: "",
+  url: "",
   is_active: true,
 };
-
-const api = axios.create({
-  baseURL: 'http://localhost:3001',
-});
-const adminToolKey = import.meta.env.VITE_ADMIN_TOOL_KEY;
+const AUTH_TOKEN_KEY = "portal_auth_token";
 
 export default function AdminPage() {
   const [tools, setTools] = useState<Tool[]>([]);
@@ -53,11 +49,13 @@ export default function AdminPage() {
     try {
       setLoading(true);
       setError(null);
-      const response = await api.get<Tool[]>('/tools');
+      const response = await api.get<Tool[]>("/tools");
       setTools(response.data);
     } catch (requestError) {
-      console.error('Error fetching tools:', requestError);
-      setError('Không tải được danh sách tool. Kiểm tra backend đang chạy ở port 3001.');
+      console.error("Error fetching tools:", requestError);
+      setError(
+        "Không tải được danh sách tool. Kiểm tra backend đang chạy ở port 3001.",
+      );
     } finally {
       setLoading(false);
     }
@@ -84,15 +82,10 @@ export default function AdminPage() {
       if (editingToolId) {
         await api.put(`/tools/${editingToolId}`, payload);
       } else {
-        if (!adminToolKey) {
-          setError('Thiếu VITE_ADMIN_TOOL_KEY trên frontend env.');
-          setSubmitting(false);
-          return;
-        }
-
-        await api.post('/tools/admin', payload, {
+        const token = localStorage.getItem(AUTH_TOKEN_KEY) || "";
+        await api.post("/tools/admin", payload, {
           headers: {
-            'x-admin-key': adminToolKey,
+            Authorization: `Bearer ${token}`,
           },
         });
       }
@@ -100,8 +93,8 @@ export default function AdminPage() {
       await fetchTools();
       resetForm();
     } catch (requestError) {
-      console.error('Error saving tool:', requestError);
-      setError('Không lưu được tool. Kiểm tra dữ liệu hoặc backend.');
+      console.error("Error saving tool:", requestError);
+      setError("Không lưu được tool. Kiểm tra dữ liệu hoặc backend.");
     } finally {
       setSubmitting(false);
     }
@@ -111,16 +104,16 @@ export default function AdminPage() {
     setEditingToolId(tool.id);
     setForm({
       name: tool.name,
-      description: tool.description ?? '',
-      icon_url: tool.icon_url ?? '',
+      description: tool.description ?? "",
+      icon_url: tool.icon_url ?? "",
       url: tool.url,
       is_active: tool.is_active,
     });
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleDelete = async (toolId: number) => {
-    const confirmed = window.confirm('Bạn có chắc muốn xóa tool này không?');
+    const confirmed = window.confirm("Bạn có chắc muốn xóa tool này không?");
     if (!confirmed) {
       return;
     }
@@ -133,8 +126,8 @@ export default function AdminPage() {
         resetForm();
       }
     } catch (requestError) {
-      console.error('Error deleting tool:', requestError);
-      setError('Không xóa được tool.');
+      console.error("Error deleting tool:", requestError);
+      setError("Không xóa được tool.");
     }
   };
 
@@ -145,7 +138,8 @@ export default function AdminPage() {
           <p className="eyebrow">Quản trị viên</p>
           <h1>Quản lý hệ thống</h1>
           <p className="hero-copy">
-            Thêm tool mới bằng link, cấu hình và kích hoạt các ứng dụng cho người dùng trong hệ thống.
+            Thêm tool mới bằng link, cấu hình và kích hoạt các ứng dụng cho
+            người dùng trong hệ thống.
           </p>
         </div>
 
@@ -168,10 +162,14 @@ export default function AdminPage() {
           <div className="panel-heading">
             <div>
               <p className="section-label">Admin form</p>
-              <h2>{editingToolId ? 'Cập nhật hệ thống' : 'Thêm mới'}</h2>
+              <h2>{editingToolId ? "Cập nhật hệ thống" : "Thêm mới"}</h2>
             </div>
             {editingToolId && (
-              <button type="button" className="ghost-button" onClick={resetForm}>
+              <button
+                type="button"
+                className="ghost-button"
+                onClick={resetForm}
+              >
                 Hủy sửa
               </button>
             )}
@@ -182,7 +180,9 @@ export default function AdminPage() {
               Tên hệ thống
               <input
                 value={form.name}
-                onChange={(event) => setForm({ ...form, name: event.target.value })}
+                onChange={(event) =>
+                  setForm({ ...form, name: event.target.value })
+                }
                 placeholder="Ví dụ: Report System"
                 required
               />
@@ -192,7 +192,9 @@ export default function AdminPage() {
               Link truy cập
               <input
                 value={form.url}
-                onChange={(event) => setForm({ ...form, url: event.target.value })}
+                onChange={(event) =>
+                  setForm({ ...form, url: event.target.value })
+                }
                 placeholder="https://..."
                 required
               />
@@ -202,7 +204,9 @@ export default function AdminPage() {
               Icon URL
               <input
                 value={form.icon_url}
-                onChange={(event) => setForm({ ...form, icon_url: event.target.value })}
+                onChange={(event) =>
+                  setForm({ ...form, icon_url: event.target.value })
+                }
                 placeholder="https://.../icon.png"
               />
             </label>
@@ -211,7 +215,9 @@ export default function AdminPage() {
               Mô tả ngắn
               <textarea
                 value={form.description}
-                onChange={(event) => setForm({ ...form, description: event.target.value })}
+                onChange={(event) =>
+                  setForm({ ...form, description: event.target.value })
+                }
                 placeholder="Mô tả chức năng của hệ thống này..."
               />
             </label>
@@ -220,72 +226,186 @@ export default function AdminPage() {
               <input
                 type="checkbox"
                 checked={form.is_active}
-                onChange={(event) => setForm({ ...form, is_active: event.target.checked })}
+                onChange={(event) =>
+                  setForm({ ...form, is_active: event.target.checked })
+                }
               />
               <span>Kích hoạt (Hiển thị cho User)</span>
             </label>
 
             <div className="form-actions full-width">
-              <button type="submit" className="primary-button" disabled={submitting}>
-                {submitting ? 'Đang lưu...' : editingToolId ? 'Lưu thay đổi' : 'Thêm hệ thống'}
+              <button
+                type="submit"
+                className="primary-button"
+                disabled={submitting}
+              >
+                {submitting
+                  ? "Đang lưu..."
+                  : editingToolId
+                    ? "Lưu thay đổi"
+                    : "Thêm hệ thống"}
               </button>
-              <button type="button" className="secondary-button" onClick={resetForm}>
+              <button
+                type="button"
+                className="secondary-button"
+                onClick={resetForm}
+              >
                 Làm mới
               </button>
             </div>
           </form>
         </div>
 
-        <div className="panel list-panel">
-          <div className="panel-heading">
+        <div
+          className="panel list-panel"
+          style={{ padding: 0, overflow: "hidden" }}
+        >
+          <div
+            className="panel-heading"
+            style={{
+              padding: "24px 32px",
+              marginBottom: 0,
+              borderBottom: "1px solid var(--border-light)",
+            }}
+          >
             <div>
               <p className="section-label">Danh sách</p>
-              <h2>Quản lý các hệ thống</h2>
+              <h2 style={{ margin: 0 }}>Quản lý các hệ thống</h2>
             </div>
           </div>
 
           {loading ? (
-            <div className="state-box">Đang tải dữ liệu...</div>
+            <div className="state-box" style={{ margin: 32 }}>
+              Đang tải dữ liệu...
+            </div>
           ) : tools.length === 0 ? (
-            <div className="state-box">Hệ thống trống. Hãy thêm ứng dụng mới bên cạnh.</div>
+            <div className="state-box" style={{ margin: 32 }}>
+              Hệ thống trống. Hãy thêm ứng dụng mới bên cạnh.
+            </div>
           ) : (
-            <div className="tools-grid">
-              {tools.map((tool) => (
-                <article key={tool.id} className="tool-card">
-                  <div className="tool-card-top">
-                    <div className="tool-icon-wrap">
-                      {tool.icon_url ? (
-                         <img src={tool.icon_url} alt={tool.name} className="tool-icon" />
-                      ) : (
-                        <span>{tool.name.slice(0, 1).toUpperCase()}</span>
-                      )}
-                    </div>
-                    <div>
-                      <h3>{tool.name}</h3>
-                      <p>{tool.description || 'Không có mô tả.'}</p>
-                    </div>
-                  </div>
-
-                  <div className="tool-meta">
-                    <span className={tool.is_active ? 'badge active' : 'badge inactive'}>
-                      {tool.is_active ? 'Active' : 'Inactive'}
-                    </span>
-                    <span className="tool-link" title={tool.url}>{tool.url}</span>
-                  </div>
-
-                  <div className="tool-actions">
-                    <a href={tool.url} target="_blank" rel="noreferrer" className="link-button">
-                      Mở tab
-                    </a>
-                    <button type="button" className="secondary-button" onClick={() => handleEdit(tool)}>
-                      Sửa
-                    </button>
-                    <button type="button" className="danger-button" onClick={() => handleDelete(tool.id)}>
-                      Xóa
-                    </button>
-                  </div>
-                </article>
-              ))}
+            <div
+              className="table-container"
+              style={{ border: "none", borderRadius: 0 }}
+            >
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>Hệ thống</th>
+                    <th>Trạng thái</th>
+                    <th>Đường dẫn</th>
+                    <th style={{ textAlign: "right" }}>Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {tools.map((tool) => (
+                    <tr key={tool.id}>
+                      <td>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "12px",
+                          }}
+                        >
+                          <div
+                            style={{
+                              width: 40,
+                              height: 40,
+                              borderRadius: "8px",
+                              background: "var(--accent-gradient)",
+                              display: "grid",
+                              placeItems: "center",
+                              fontWeight: "bold",
+                              flexShrink: 0,
+                            }}
+                          >
+                            {tool.icon_url ? (
+                              <img
+                                src={tool.icon_url}
+                                alt={tool.name}
+                                style={{
+                                  width: "100%",
+                                  height: "100%",
+                                  objectFit: "cover",
+                                  borderRadius: "8px",
+                                }}
+                              />
+                            ) : (
+                              tool.name.charAt(0).toUpperCase()
+                            )}
+                          </div>
+                          <div>
+                            <div
+                              style={{
+                                fontWeight: 600,
+                                color: "var(--text-primary)",
+                              }}
+                            >
+                              {tool.name}
+                            </div>
+                            <div
+                              style={{
+                                fontSize: "0.85rem",
+                                color: "var(--text-secondary)",
+                              }}
+                            >
+                              {tool.description && tool.description.length > 40
+                                ? tool.description.substring(0, 40) + "..."
+                                : tool.description || "Không có mô tả"}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <span
+                          className={
+                            tool.is_active ? "badge active" : "badge inactive"
+                          }
+                        >
+                          {tool.is_active ? "Kích hoạt" : "Vô hiệu"}
+                        </span>
+                      </td>
+                      <td>
+                        <a
+                          href={tool.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          style={{
+                            color: "var(--accent-secondary)",
+                            fontSize: "0.9rem",
+                          }}
+                        >
+                          {tool.url && tool.url.length > 25
+                            ? tool.url.substring(0, 25) + "..."
+                            : tool.url}
+                        </a>
+                      </td>
+                      <td>
+                        <div
+                          className="td-actions"
+                          style={{ justifyContent: "flex-end" }}
+                        >
+                          <button
+                            type="button"
+                            className="ghost-button"
+                            onClick={() => handleEdit(tool)}
+                          >
+                            Sửa
+                          </button>
+                          <button
+                            type="button"
+                            className="ghost-button"
+                            style={{ color: "#f87171" }}
+                            onClick={() => handleDelete(tool.id)}
+                          >
+                            Xóa
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
         </div>
